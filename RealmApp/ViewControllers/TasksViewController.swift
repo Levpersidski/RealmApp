@@ -79,31 +79,25 @@ class TasksViewController: UITableViewController {
             StorageManager.shared.doneTask(task)
             let rowIndex = IndexPath(row: currentTasks.index(of: task) ?? 0, section: 0)
             let nextIndex = IndexPath(row: completedTasks.index(of: task) ?? 0, section: 1)
-            tableView.moveRow(at: rowIndex, to: nextIndex )
-            
-                isDone(true)
-            }
-        
-        let undoneAction = UIContextualAction(style: .normal, title: "Undone") { [self] _, _, isDone in
-            StorageManager.shared.doneTask(task)
-                    let rowIndex = IndexPath(row: completedTasks.index(of: task) ?? 0, section: 1)
-                    let nextIndex = IndexPath(row: currentTasks.index(of: task) ?? 0, section: 0)
-                    tableView.moveRow(at: rowIndex, to: nextIndex)
-                    isDone(true)
-                }
-                
-      
-        editAction.backgroundColor = .orange
-        doneAction.backgroundColor = #colorLiteral(red: 0.3411764801, green: 0.6235294342, blue: 0.1686274558, alpha: 1)
-        undoneAction.backgroundColor = #colorLiteral(red: 0.3411764801, green: 0.6235294342, blue: 0.1686274558, alpha: 1)
-        
-        if indexPath.section == 0 {
-            return UISwipeActionsConfiguration(actions: [doneAction, editAction, deleteAction])
-        } else {
-            return UISwipeActionsConfiguration(actions: [undoneAction,editAction, deleteAction])
+            let destinationIndexRow = indexPath.section == 0 ? nextIndex : rowIndex
+            tableView.moveRow(at: indexPath, to: destinationIndexRow)
+            isDone(true)
         }
+        
+        if indexPath.section == 1 {
+            doneAction.title = "Undone"
+           
+        } else {
+            doneAction.title = "Done"
+        }
+            
+            editAction.backgroundColor = .orange
+            doneAction.backgroundColor = #colorLiteral(red: 0.3411764801, green: 0.6235294342, blue: 0.1686274558, alpha: 1)
+            
+            
+        
+        return UISwipeActionsConfiguration(actions: [doneAction, editAction, deleteAction])
     }
-
 }
 
 extension TasksViewController {
