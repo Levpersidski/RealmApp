@@ -15,11 +15,11 @@ class TasksViewController: UITableViewController {
     
     private var currentTasks: Results<Task>!
     private var completedTasks: Results<Task>!
-
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         title = taskList.name
-    
+        
         
         currentTasks = taskList.tasks.filter("isComplete = false")
         completedTasks = taskList.tasks.filter("isComplete = true")
@@ -61,7 +61,7 @@ class TasksViewController: UITableViewController {
     
     
     override func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
-        let task = taskList.tasks[indexPath.row]
+        let task = indexPath.section == 0 ? currentTasks[indexPath.row] : completedTasks[indexPath.row]
         
         let deleteAction = UIContextualAction(style: .destructive, title: "Delete") { _, _, _ in
             StorageManager.shared.deleteTask(task)
@@ -86,15 +86,15 @@ class TasksViewController: UITableViewController {
         
         if indexPath.section == 1 {
             doneAction.title = "Undone"
-           
+            
         } else {
             doneAction.title = "Done"
         }
-            
-            editAction.backgroundColor = .orange
-            doneAction.backgroundColor = #colorLiteral(red: 0.3411764801, green: 0.6235294342, blue: 0.1686274558, alpha: 1)
-            
-            
+        
+        editAction.backgroundColor = .orange
+        doneAction.backgroundColor = #colorLiteral(red: 0.3411764801, green: 0.6235294342, blue: 0.1686274558, alpha: 1)
+        
+        
         
         return UISwipeActionsConfiguration(actions: [doneAction, editAction, deleteAction])
     }
@@ -107,21 +107,21 @@ extension TasksViewController {
         let alert = UIAlertController.createAlert(withTitle: title, andMessage: "What do you want to do?")
         
         alert.action(with: task) { newValue, note in
-            if let _ = task, let _ = completion {
-                // TODO - edit task
+            if let task = task, let completion = completion {
+                StorageManager.shared.editTask(task, newValue: newValue, note: note)
+                completion()
             } else {
-                self.saveTask(withName: newValue, andNote: note)
+                self.save(task: newValue, withNote: note)
             }
         }
         
         present(alert, animated: true)
     }
     
-    private func saveTask(withName name: String, andNote note: String) {
-        let task = Task(value: [name, note])
-        StorageManager.shared.save(task, to: taskList)
-        
-        let rowIndex = IndexPath(row: currentTasks.index(of: task) ?? 0, section: 0)
-        tableView.insertRows(at: [rowIndex], with: .automatic)
+    private func save(task: String, withNote note: String) {
+        StorageManager.shared.save(task, withNote: note, to: taskList) { task in
+            let rowIndex = IndexPath(row: currentTasks.index(of: task) ?? 0, section: 0)
+            tableView.insertRows(at: [rowIndex], with: .automatic)
+        }
     }
 }

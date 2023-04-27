@@ -10,7 +10,7 @@ import UIKit
 import RealmSwift
 
 class TaskListViewController: UITableViewController {
-
+    
     var taskLists: Results<TaskList>!
     
     override func viewDidLoad() {
@@ -45,6 +45,7 @@ class TaskListViewController: UITableViewController {
         content.text = taskList.name
         content.secondaryText = "\(taskList.tasks.count)"
         cell.contentConfiguration = content
+        cell.configure(with: taskList)
         return cell
     }
     
@@ -84,20 +85,20 @@ class TaskListViewController: UITableViewController {
         let taskList = taskLists[indexPath.row]
         tasksVC.taskList = taskList
     }
-
+    
     @IBAction func sortingList(_ sender: UISegmentedControl) {
         switch sender.selectedSegmentIndex {
-           case 0:
+        case 0:
             taskLists = StorageManager.shared.realm.objects(TaskList.self)
             tableView.reloadData()
-           case 1:
+        case 1:
             taskLists = taskLists.sorted(byKeyPath: "name", ascending: true)
             tableView.reloadData()
-           default:
-               break
-           }
-       }
-
+        default:
+            break
+        }
+    }
+    
     
     @objc private func  addButtonPressed() {
         showAlert()

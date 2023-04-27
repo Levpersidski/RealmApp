@@ -42,15 +42,20 @@ class StorageManager {
         }
     }
     
-    
-    
     func edit(_ taskList: TaskList, newValue: String) {
         write {
             taskList.name = newValue
         }
     }
     
-
+    func editTask(_ task: Task, newValue: String, note: String) {
+        write {
+            task.name = newValue
+            task.note = note
+        }
+    }
+    
+    
     func done(_ taskList: TaskList) {
         write {
             taskList.tasks.setValue(true, forKey: "isComplete")
@@ -61,12 +66,11 @@ class StorageManager {
         write {
             
             task.isComplete.toggle()
-
+            
         }
     }
     
     
-
     // MARK: - Tasks
     func save(_ task: Task, to taskList: TaskList) {
         write {
@@ -81,6 +85,14 @@ class StorageManager {
             }
         } catch {
             print(error)
+        }
+    }
+    
+    func save(_ task: String, withNote note: String, to taskList: TaskList, completion: (Task) -> Void) {
+        write {
+            let task = Task(value: [task, note])
+            taskList.tasks.append(task)
+            completion(task)
         }
     }
 }
